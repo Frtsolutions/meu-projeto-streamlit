@@ -5,10 +5,21 @@ import database as db
 def show_dashboard():
     st.header("📊 Visão Geral do Negócio")
     
-    # Atualizar dados
-    receitas, despesas, saldo = db.obter_resumo()
+    # 1. Buscar dados do banco (Supabase)
+    df = db.buscar_transacoes()
     
-    # Cartões de Métricas (KPIs)
+    # 2. Calcular os totais (Substituindo a antiga função db.obter_resumo)
+    receitas = 0.0
+    despesas = 0.0
+    saldo = 0.0
+    
+    if not df.empty:
+        # Soma condicional usando Pandas
+        receitas = df[df["tipo"] == "Receita"]["valor"].sum()
+        despesas = df[df["tipo"] == "Despesa"]["valor"].sum()
+        saldo = receitas - despesas
+    
+    # 3. Cartões de Métricas (KPIs)
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -22,9 +33,7 @@ def show_dashboard():
         
     st.divider()
     
-    # Gráficos
-    df = db.buscar_transacoes()
-    
+    # 4. Gráficos
     if not df.empty:
         col_graf1, col_graf2 = st.columns(2)
         
@@ -47,6 +56,6 @@ def show_dashboard():
                                  text_auto='.2s', color="valor")
                 st.plotly_chart(fig_bar, use_container_width=True)
             else:
-                st.info("Ainda não há despesas registadas para gerar este gráfico.")
+                st.info("Ainda não há despesas registradas para gerar este gráfico.")
     else:
-        st.warning("Registe a sua primeira movimentação para ver os gráficos!")
+        st.warning("Registre a sua primeira movimentação para ver os gráficos!")

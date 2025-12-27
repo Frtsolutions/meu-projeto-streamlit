@@ -19,7 +19,7 @@ def show_lancamentos():
             if tipo == "Receita":
                 categorias = ["Vendas", "Serviços", "Investimentos", "Outros"]
             else:
-                categorias = ["Fornecedores", "Aluguer/Fixo", "Marketing", "Pessoal", "Impostos", "Outros"]
+                categorias = ["Fornecedores", "Aluguel/Fixo", "Marketing", "Pessoal", "Impostos", "Outros"]
                 
             categoria = st.selectbox("Categoria", categorias)
             
@@ -28,8 +28,11 @@ def show_lancamentos():
         submitted = st.form_submit_button("💾 Salvar Lançamento")
         
         if submitted:
-            try:
-                db.adicionar_transacao(data_mov, tipo, categoria, valor, descricao)
-                st.success("Lançamento registado com sucesso!")
-            except Exception as e:
-                st.error(f"Erro ao salvar: {e}")
+            # Correção: A ordem dos argumentos deve bater com a função no database.py
+            # Ordem correta: data, tipo, categoria, descricao, valor
+            sucesso = db.adicionar_transacao(data_mov, tipo, categoria, descricao, valor)
+            
+            if sucesso:
+                st.success("Lançamento registrado com sucesso!")
+            else:
+                st.error("Houve um erro ao tentar salvar no banco de dados.")
